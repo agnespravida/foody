@@ -1,6 +1,6 @@
 const express = require('express');
 const { ApolloServer, gql } = require('apollo-server-express');
-const { Product, User, Cart } = require("./models")
+const { Product, User, Cart, History } = require("./models")
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -35,7 +35,9 @@ const typeDefs = gql`
   type Mutation {
     loginUser(email: String, password: String): Access,
     addToCart(id: ID): Message,
-    removeFromCart(id: ID): Message
+    removeFromCart(id: ID): Message,
+    emptyCart: Message,
+    checkout: Message
   }
   type Query {
     Products: [Product],
@@ -163,7 +165,7 @@ const resolvers = {
           })
           .then(cart => {
             if (cart) {
-              if (cart.quantiy > 1) {
+              if (cart.quantity > 1) {
                 return Cart.decrement('quantity', {
                   where: {
                     ProductId: args.id,
@@ -171,7 +173,7 @@ const resolvers = {
                   }
                 })
               }
-              else {
+              else if (cart.quantity <= 1){
                 return Cart.destroy({
                   where: {
                     ProductId: args.id,
@@ -206,6 +208,113 @@ const resolvers = {
       }
       catch (err) {
         throw (err)
+      }
+    },
+    emptyCart: async (parents, args, { loggedInUser }) => {
+      try {
+        if (loggedInUser) {
+          let carts = await Cart.findAll({
+            where: {
+              UserId: loggedInUser.id
+            }
+          })
+          let promises = []
+          for (let i = 0; i < carts.length; i++) {
+            promises.push (Cart.destroy({
+              where: {
+                ProductId: carts[i].ProductId,
+                UserId: loggedInUser.id
+              }
+            })
+              .then(_ => {
+                return Product.findOne({
+                  where: {
+                    id: carts[i].ProductId
+                  }
+                })
+              })
+              .then(product => {
+                return Product.update({
+                  stock: product.stock + carts[i].quantity
+                }, {
+                  where: {
+                    id: carts[i].ProductId
+                  }
+                })
+              })
+              .then(_ => {
+                
+              })
+              .catch(err => {
+                throw(err)
+              })
+            )
+          }
+          return Promise.all(promises)
+            .then(_ => {
+              return {
+                message: "Successfully empty your cart"
+              }
+            })
+            .catch(err => {
+              throw(err)
+            })
+        }
+        else {
+          throw new Error ("Please login first")
+        }
+      }
+      catch (error) {
+        throw(error)
+      }
+    },
+    checkout: async (parents, args, { loggedInUser }) => {
+      try {
+        if (loggedInUser) {
+          let carts = await Cart.findAll({
+            where: {
+              UserId: loggedInUser.id
+            }
+          })
+          let promises = []
+          for (let i = 0; i < carts.length; i++) {
+            promises.push (Cart.destroy({
+              where: {
+                ProductId: carts[i].ProductId,
+                UserId: loggedInUser.id
+              }
+            })
+              .then(_ => {
+                return History.create({
+                  ProductId: carts[i].ProductId,
+                  UserId: carts[i].UserId,
+                  quantity: carts[i].quantity
+                })
+              })
+              .then(_ => {
+                
+              })
+              .catch(err => {
+                throw(err)
+              })
+            )
+          }
+          return Promise.all(promises)
+            .then(_ => {
+              return {
+                message: "Successfully checkout"
+              }
+            })
+            .catch(err => {
+              throw(err)
+            })
+        }
+        else {
+          throw new Error ("Please login first")
+        }
+      }
+      catch (error) {
+        throw(error)
       }
     }
   }
