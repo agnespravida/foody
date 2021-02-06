@@ -1,6 +1,6 @@
 const express = require('express');
 const { ApolloServer, gql } = require('apollo-server-express');
-const { Product, User, Cart, History } = require("./models")
+const { Product, User, Cart, History, sequelize } = require("./models")
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -17,8 +17,9 @@ const typeDefs = gql`
     updatedAt: String,
     createdAt: String
   }
-  type Cart {
+  type Data {
     id: ID,
+    ProductId: ID,
     name: String,
     price: Int,
     quantity: Int,
@@ -41,7 +42,8 @@ const typeDefs = gql`
   }
   type Query {
     Products: [Product],
-    Carts: [Cart]
+    Carts: [Data],
+    History: [Data]
   }
 `;
 
@@ -51,6 +53,70 @@ const resolvers = {
       try {
         let products = await Product.findAll()
         return products
+      }
+      catch (error) {
+        throw (error)
+      }
+    },
+    Carts: async (parents, args, { loggedInUser }) => {
+      try {
+        if (loggedInUser) {
+          let rawCarts = await Cart.findAll({
+            where: {
+              UserId: loggedInUser.id
+            },
+            include: {
+              model: Product
+            }
+          })
+          let carts = rawCarts.map(cart => {
+            return {
+              id: cart.id,
+              ProductId: cart.Product.id,
+              name: cart.Product.name,
+              price: cart.Product.price,
+              quantity: cart.quantity,
+              updatedAt: cart.updatedAt,
+              createdAt: cart.createdAt
+            }
+          })
+          return carts
+        }
+        else {
+          throw new Error ("Please login first")
+        }
+      }
+      catch (error) {
+        throw (error)
+      }
+    },
+    History: async (parents, args, { loggedInUser }) => {
+      try {
+        if (loggedInUser) {
+          let rawHistory = await History.findAll({
+            where: {
+              UserId: loggedInUser.id
+            },
+            include: {
+              model: Product
+            }
+          })
+          let history = rawHistory.map(history => {
+            return {
+              id: history.id,
+              ProductId: history.Product.id,
+              name: history.Product.name,
+              price: history.Product.price,
+              quantity: history.quantity,
+              updatedAt: history.updatedAt,
+              createdAt: history.createdAt
+            }
+          })
+          return history
+        }
+        else {
+          throw new Error ("Please login first")
+        }
       }
       catch (error) {
         throw (error)
@@ -84,11 +150,12 @@ const resolvers = {
           throw (err)
         })
     },
-    addToCart: (_, args, { loggedInUser }) => {
+    addToCart: async (_, args, { loggedInUser }) => {
     try {
       if (loggedInUser) {
-        // let stock;
+        const t = await sequelize.transaction()
         return Product.findOne({
+          transaction: t,
           where: {
             id: args.id
           }
@@ -99,8 +166,8 @@ const resolvers = {
                 throw new Error ("Product is out of stock")
               }
               else {
-                // stock = product.stock
                 return Cart.findOne({
+                transaction: t,
                 where: {
                   UserId: loggedInUser.id,
                   ProductId: args.id
@@ -115,6 +182,7 @@ const resolvers = {
           .then(item => {
             if (item) {
               return Cart.increment('quantity', {
+                transaction: t,
                 where: {
                   UserId: loggedInUser.id,
                   ProductId: args.id
@@ -127,20 +195,27 @@ const resolvers = {
                 UserId: loggedInUser.id,
                 ProductId: args.id,
                 quantity: 1
+              }, {
+                transaction: t
               })
             }
           })
           .then(cart => {
             return Product.decrement('stock', {
+              transaction: t,
               where: {
                 id: args.id
               }
             })
           })
           .then(_ => {
+            return t.commit()
+          })
+          .then(_ => {
             return {
               message: "Successfully add item to cart"
             }
+
           })
           .catch(err => {
             throw (err)
@@ -151,13 +226,16 @@ const resolvers = {
       }
     }
       catch (err) {
+        await t.rollback()
         throw (err)
       }
     },
-    removeFromCart: (_, args, { loggedInUser }) => {
+    removeFromCart: async (_, args, { loggedInUser }) => {
       try {
         if (loggedInUser) {
+          const t = await sequelize.transaction()
           return Cart.findOne({
+            transaction: t,
             where: {
               ProductId: args.id,
               UserId: loggedInUser.id
@@ -167,6 +245,7 @@ const resolvers = {
             if (cart) {
               if (cart.quantity > 1) {
                 return Cart.decrement('quantity', {
+                  transaction: t,
                   where: {
                     ProductId: args.id,
                     UserId: loggedInUser.id
@@ -175,6 +254,7 @@ const resolvers = {
               }
               else if (cart.quantity <= 1){
                 return Cart.destroy({
+                  transaction: t,
                   where: {
                     ProductId: args.id,
                     UserId: loggedInUser.id
@@ -188,15 +268,20 @@ const resolvers = {
           })
           .then(_ => {
             return Product.increment('stock', {
+              transaction: t,
               where: {
                 id: args.id
               }
             })
           })
           .then(_ => {
+            return t.commit()
+          })
+          .then(_ => {
             return {
               message: "Successfully remove an item from your cart"
             }
+
           })
           .catch(err => {
             throw (err)
@@ -207,12 +292,14 @@ const resolvers = {
         }
       }
       catch (err) {
+        await t.rollback()
         throw (err)
       }
     },
     emptyCart: async (parents, args, { loggedInUser }) => {
       try {
         if (loggedInUser) {
+          const t = await sequelize.transaction()
           let carts = await Cart.findAll({
             where: {
               UserId: loggedInUser.id
@@ -221,6 +308,7 @@ const resolvers = {
           let promises = []
           for (let i = 0; i < carts.length; i++) {
             promises.push (Cart.destroy({
+              transaction: t,
               where: {
                 ProductId: carts[i].ProductId,
                 UserId: loggedInUser.id
@@ -228,6 +316,7 @@ const resolvers = {
             })
               .then(_ => {
                 return Product.findOne({
+                  transaction: t,
                   where: {
                     id: carts[i].ProductId
                   }
@@ -237,6 +326,7 @@ const resolvers = {
                 return Product.update({
                   stock: product.stock + carts[i].quantity
                 }, {
+                  transaction: t,
                   where: {
                     id: carts[i].ProductId
                   }
@@ -251,6 +341,9 @@ const resolvers = {
             )
           }
           return Promise.all(promises)
+            .then(_ => {
+              return t.commit()
+            })
             .then(_ => {
               return {
                 message: "Successfully empty your cart"
@@ -265,6 +358,7 @@ const resolvers = {
         }
       }
       catch (error) {
+        await t.rollback()
         throw(error)
       }
     },
@@ -276,9 +370,11 @@ const resolvers = {
               UserId: loggedInUser.id
             }
           })
+          const t = await sequelize.transaction()
           let promises = []
           for (let i = 0; i < carts.length; i++) {
             promises.push (Cart.destroy({
+              transaction: t,
               where: {
                 ProductId: carts[i].ProductId,
                 UserId: loggedInUser.id
@@ -289,6 +385,8 @@ const resolvers = {
                   ProductId: carts[i].ProductId,
                   UserId: carts[i].UserId,
                   quantity: carts[i].quantity
+                }, {
+                  transaction: t
                 })
               })
               .then(_ => {
@@ -300,6 +398,9 @@ const resolvers = {
             )
           }
           return Promise.all(promises)
+            .then(_ => {
+              return t.commit()
+            })
             .then(_ => {
               return {
                 message: "Successfully checkout"
@@ -314,6 +415,7 @@ const resolvers = {
         }
       }
       catch (error) {
+        await t.rollback()
         throw(error)
       }
     }
