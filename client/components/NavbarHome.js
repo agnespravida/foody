@@ -8,6 +8,7 @@ function NavbarHome () {
         <Navbar bg="dark" variant="dark">
           <Navbar.Brand href="#home">Navbar</Navbar.Brand>
           <Nav className="mr-auto">
+          <Link href="/"><a>Home</a></Link>
             <Link href="/cart"><a>Cart</a></Link>
             <Link href="/history"><a>History</a></Link>  
           </Nav>

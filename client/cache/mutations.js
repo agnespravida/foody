@@ -21,6 +21,13 @@ const REMOVE_FROM_CART = gql`
     }
   }
 `;
+const EMPTY_CART = gql`
+  mutation emptyCart {
+    emptyCart {
+      message
+    }
+  }
+`;
 
 
-export { LOGIN, ADD_TO_CART, REMOVE_FROM_CART }
+export { LOGIN, ADD_TO_CART, REMOVE_FROM_CART, EMPTY_CART }
