@@ -51,7 +51,11 @@ const resolvers = {
   Query: {
     Products: async () => {
       try {
-        let products = await Product.findAll()
+        let products = await Product.findAll({
+          order: [
+            ['id', 'ASC']
+          ]
+        })
         return products
       }
       catch (error) {
@@ -65,6 +69,9 @@ const resolvers = {
             where: {
               UserId: loggedInUser.id
             },
+            order: [
+              ["id", "ASC"]
+            ],
             include: {
               model: Product
             }
@@ -424,6 +431,7 @@ const resolvers = {
 
 const server = new ApolloServer({ typeDefs, resolvers, context: ({ req }) => {
   let access_token = req.headers.access_token
+  console.log(access_token)
   if (access_token) {
     let payload = jwt.verify(access_token, "secretJWT")
     return User.findOne({

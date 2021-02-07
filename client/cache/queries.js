@@ -10,5 +10,16 @@ query getProducts{
   }
 }
 `
+const GET_CARTS = gql `
+query getCart{
+  Carts{
+    id
+    name
+    price
+    quantity
+    ProductId
+  }
+}
+`
 
-export { GET_PRODUCTS }
+export { GET_PRODUCTS, GET_CARTS }

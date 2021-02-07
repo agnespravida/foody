@@ -1,14 +1,13 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import JumbotronComp from '../components/jumbotronComp'
+import NavbarHome from '../components/NavbarHome'
+import ProductCard from '../components/ProductCard'
 import { useQuery } from '@apollo/client'
 import { GET_PRODUCTS } from '../cache/queries'
 
 export default function Home() {
   const { loading, error, data } = useQuery(GET_PRODUCTS);
-  if (data) {
-    console.log(data)
-  }
   if (error) {
     console.log(error)
   }
@@ -17,11 +16,17 @@ export default function Home() {
       <Head>
         <title>foody</title>
       </Head>
-
+      <NavbarHome />
       <JumbotronComp />
       <main className={styles.main}>
         {
-          loading ? <h1>Loading...</h1> : <div>{JSON.stringify(data)}</div>
+          loading && <h1>Loading...</h1>
+        }
+        {
+          error && <h1>Error...</h1>
+        }
+        {
+          data && data["Products"].map(element => <ProductCard product={element} key={element.id}/>)
         }
         {/* <div className={styles.grid}>
           <a href="https://nextjs.org/docs" className={styles.card}>
