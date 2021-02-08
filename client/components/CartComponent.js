@@ -30,7 +30,7 @@ function CartComponent (props) {
       addToCart({ variables: { id: props.cart.ProductId } });
       setTimeout(() => {
         emptyCart()
-      }, 10000)
+      }, 20000)
     }
   }
   function handleRemoveFromCart () {
@@ -39,7 +39,7 @@ function CartComponent (props) {
       removeFromCart({ variables: { id: props.cart.ProductId } });
       setTimeout(() => {
         emptyCart()
-      }, 10000)
+      }, 20000)
     }
   }
 

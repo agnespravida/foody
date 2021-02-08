@@ -32,7 +32,7 @@ function ProductCard (props) {
       addToCart({ variables: { id: props.product.id } });
       setTimeout(() => {
         emptyCart()
-      }, 10000)
+      }, 20000)
     }
     else {
       router.push("/login")
