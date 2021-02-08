@@ -20,13 +20,19 @@ function ProductCard (props) {
   })
   let router = useRouter()
 
+  function convertedRupiah () {
+    let rupiah = ''
+    const angkarev = props.product.price.toString().split('').reverse().join('')
+    for (let i = 0; i < angkarev.length; i++) if (i % 3 === 0) rupiah += angkarev.substr(i, 3) + '.'
+    return 'Rp. ' + rupiah.split('', rupiah.length - 1).reverse().join('')
+  }
   function handleAddToCart () {
     if (localStorage.getItem("access_token")) {
-      // clearTimeout()
+      clearTimeout()
       addToCart({ variables: { id: props.product.id } });
-      // setTimeout(() => {
-      //   emptyCart()
-      // }, 5000)
+      setTimeout(() => {
+        emptyCart()
+      }, 10000)
     }
     else {
       router.push("/login")
@@ -43,8 +49,8 @@ function ProductCard (props) {
       <Card.Img variant="top" src={props.product.imageUrl} />
         <Card.Body>
           <p style={{fontSize: '0.8rem', marginBottom: '5px'}}>{props.product.name}</p>
-          <p style={{fontSize: '0.8rem', marginBottom: '5px'}}><b>Rp. {props.product.price}</b></p>
-          <ProgressBar variant={props.product.stock > 6 ? "info":"danger"} now={props.product.stock*10} label={`${props.product.stock} items`}/>
+          <p style={{fontSize: '0.8rem', marginBottom: '5px'}}><b>{convertedRupiah()}</b></p>
+          <ProgressBar variant={props.product.stock > 5 ? "info":"danger"} now={props.product.stock*10} label={`${props.product.stock} items`}/>
           {
             props.product.stock > 0 ? 
             <Button style={{marginTop: '10px'}} onClick={handleAddToCart} block><i className="fa fa-shopping-cart" style={{fontSize: '20px', color: 'white'}}></i> Add to cart</Button>

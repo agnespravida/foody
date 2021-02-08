@@ -107,6 +107,9 @@ const resolvers = {
             where: {
               UserId: loggedInUser.id
             },
+            order: [
+              ["createdAt", "DESC"]
+            ],
             include: {
               model: Product
             }

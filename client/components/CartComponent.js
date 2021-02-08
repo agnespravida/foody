@@ -26,21 +26,28 @@ function CartComponent (props) {
   })
   function handleAddToCart () {
     if (localStorage.getItem("access_token")) {
-      // clearTimeout()
+      clearTimeout()
       addToCart({ variables: { id: props.cart.ProductId } });
-      // setTimeout(() => {
-      //   emptyCart()
-      // }, 5000)
+      setTimeout(() => {
+        emptyCart()
+      }, 10000)
     }
   }
   function handleRemoveFromCart () {
     if (localStorage.getItem("access_token")) {
-      // clearTimeout()
+      clearTimeout()
       removeFromCart({ variables: { id: props.cart.ProductId } });
-      // setTimeout(() => {
-      //   emptyCart()
-      // }, 5000)
+      setTimeout(() => {
+        emptyCart()
+      }, 10000)
     }
+  }
+
+  function convertedRupiah () {
+    let rupiah = ''
+    const angkarev = (props.cart.price).toString().split('').reverse().join('')
+    for (let i = 0; i < angkarev.length; i++) if (i % 3 === 0) rupiah += angkarev.substr(i, 3) + '.'
+    return 'Rp. ' + rupiah.split('', rupiah.length - 1).reverse().join('')
   }
 
   return (
@@ -49,7 +56,7 @@ function CartComponent (props) {
       <img src={props.cart.imageUrl} alt={props.cart.name} width="85" height="85" style={{marginRight: '20px'}}/>
       <div style={{marginRight: '20px', textAlign: 'center'}}>
         <p style={{fontSize: '1rem', marginBottom: '5px'}}>{props.cart.name}</p>
-        <p style={{fontSize: '1rem', marginBottom: '5px'}}><b>Rp. {props.cart.price}</b></p>
+        <p style={{fontSize: '1rem', marginBottom: '5px'}}><b>{convertedRupiah()}</b></p>
       </div>
       <ButtonGroup aria-label="Basic example">
         <Button variant="secondary" onClick={handleAddToCart}>+</Button>

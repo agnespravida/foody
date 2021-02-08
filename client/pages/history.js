@@ -3,6 +3,7 @@ import NavbarHome from '../components/NavbarHome'
 import { useQuery } from '@apollo/client'
 import { GET_HISTORY } from '../cache/queries'
 import Head from 'next/head'
+import styles from '../styles/History.module.css'
 
 function History () {
   const { data, error, loading } = useQuery(GET_HISTORY)
@@ -19,10 +20,12 @@ function History () {
         <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet"></link>
       </Head>
     <NavbarHome />
-    <h2>History</h2>
+    <main className={styles.main}>
+      <h1 style={{fontFamily: "Lobster", fontSize: '3rem', marginBottom: '30px', textAlign: 'center'}}>Your Order History</h1>
     {
       data && data["History"].map(history => <HistoryComponent key={history.id} history={history}/>)
     }
+    </main>
     </>
   )
 }

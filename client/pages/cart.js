@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { GET_CARTS } from '../cache/queries'
+import { GET_CARTS, GET_HISTORY, GET_PRODUCTS } from '../cache/queries'
 import { CHECKOUT } from '../cache/mutations'
 import CartComponent from '../components/CartComponent'
 import NavbarHome from '../components/NavbarHome'
@@ -8,12 +8,18 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Cart.module.css'
+import Swal from 'sweetalert2'
 
 
 function Cart () {
   let router = useRouter()
   const { loading, error, data} = useQuery(GET_CARTS);
-  const [checkoutCart] = useMutation(CHECKOUT)
+  const [checkoutCart] = useMutation(CHECKOUT, {
+    refetchQueries: [
+      {query: GET_PRODUCTS},
+      {query: GET_HISTORY}
+    ]
+  })
   if (error) {
     console.log(error)
   }
@@ -24,13 +30,49 @@ function Cart () {
       for (let i = 0; i < data["Carts"].length; i++) {
         totalPrice += (data["Carts"][i].price * data["Carts"][i].quantity)
       }
-      return totalPrice
+      let rupiah = ''
+      const angkarev = (totalPrice).toString().split('').reverse().join('')
+      for (let i = 0; i < angkarev.length; i++) if (i % 3 === 0) rupiah += angkarev.substr(i, 3) + '.'
+      return 'Rp. ' + rupiah.split('', rupiah.length - 1).reverse().join('')
     }
   }
 
   function checkout () {
-    checkoutCart()
-    router.push("/history")
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: 'btn btn-success',
+        cancelButton: 'btn btn-danger'
+      },
+      buttonsStyling: false
+    })
+    
+    swalWithBootstrapButtons.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Checkout',
+      cancelButtonText: 'No, cancel!',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        swalWithBootstrapButtons.fire(
+          'Successful!',
+          'Your order has been proceed',
+          'success'
+        )
+        checkoutCart()
+        router.push("/history")
+      } else if (
+        result.dismiss === Swal.DismissReason.cancel
+      ) {
+        swalWithBootstrapButtons.fire(
+          'Cancelled',
+          'Your order has not been proceed:)',
+          'error'
+        )
+      }
+    })
   }
   
   return (
@@ -62,10 +104,16 @@ function Cart () {
         <div className="col-md-4 col-sm-12">
           {
             data?.["Carts"]?.length && 
-            <Card style={{border: '1px solid', padding: '10px'}}>
-              <h3>Order Summary</h3>
-              <h5>{getTotal()}</h5>
-              <Button onClick={checkout}>Checkout</Button>
+            <Card className={styles.summary} variant="light">
+              <Card.Header>
+                <h3 style={{fontFamily: "Lobster"}}>Order Summary</h3>
+              </Card.Header>
+              <Card.Body>
+                <p>Total Price: {getTotal()}</p>
+              </Card.Body>
+              <Card.Footer>
+                <Button onClick={checkout}>Checkout</Button>
+              </Card.Footer>
             </Card>
           }
         </div>

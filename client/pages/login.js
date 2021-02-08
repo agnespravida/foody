@@ -38,7 +38,7 @@ function loginPage () {
         <Card className={styles.card}>
         <Image
           src="/logo.png"
-          alt="Picture of the author"
+          alt="Foody logo"
           width={250}
           height={200}
       />
