@@ -28,6 +28,13 @@ const EMPTY_CART = gql`
     }
   }
 `;
+const CHECKOUT = gql`
+  mutation checkout {
+    checkout {
+      message
+    }
+  }
+`;
 
 
-export { LOGIN, ADD_TO_CART, REMOVE_FROM_CART, EMPTY_CART }
+export { LOGIN, ADD_TO_CART, REMOVE_FROM_CART, EMPTY_CART, CHECKOUT }

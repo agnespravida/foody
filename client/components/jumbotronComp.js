@@ -5,9 +5,6 @@ function JumbotronComp () {
   return (
     <>
       <Jumbotron fluid className={styles.jumbotronimage}>
-        <Container className={styles.container}>
-          <h1 style={{color: 'white', fontSize: '7rem'}}>foody</h1>
-        </Container>
       </Jumbotron>
     </>
   )

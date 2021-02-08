@@ -1,27 +1,43 @@
 import Link from 'next/link'
-import { Nav, Navbar } from 'react-bootstrap'
+import { Nav, Navbar, Button } from 'react-bootstrap'
+import { useRouter } from 'next/router'
 
 function NavbarHome () {
+
+  let router = useRouter()
+
+  function logout () {
+    localStorage.removeItem("access_token")
+    router.push("/")
+  }
+
   if (typeof window !== 'undefined') {
     if (localStorage.getItem("access_token")) {
       return (
         <Navbar bg="dark" variant="dark">
-          <Navbar.Brand href="#home">Navbar</Navbar.Brand>
+          <Link href="/"><Button variant="dark" style={{fontFamily: "Lobster"}}>Foody</Button></Link>
           <Nav className="mr-auto">
-          <Link href="/"><a>Home</a></Link>
-            <Link href="/cart"><a>Cart</a></Link>
-            <Link href="/history"><a>History</a></Link>  
+            <Link href="/cart"><Button variant="dark">Cart</Button></Link>
+            <Link href="/history"><Button variant="dark">History</Button></Link>  
+            <Button variant="dark" onClick={logout}>Logout</Button>  
           </Nav>
         </Navbar>
       )
     }
+    return (
+      <Navbar bg="dark" variant="dark">
+        <Nav className="mr-auto">
+          <Link href="/"><Button variant="dark" style={{fontFamily: "Lobster", fontSize: '22px'}}>Foody</Button></Link>
+        </Nav>
+        <Nav>
+          <Link href="/login"><Button variant="dark">Login</Button></Link>
+        </Nav>
+      </Navbar>
+    )
   }
+
   return (
     <Navbar bg="dark" variant="dark">
-      <Navbar.Brand href="#home">Navbar</Navbar.Brand>
-      <Nav className="mr-auto">
-        <Link href="/login"><a>Login</a></Link> 
-      </Nav>
     </Navbar>
   )
 }

@@ -7,6 +7,7 @@ query getProducts{
     name
     price
     stock
+    imageUrl
   }
 }
 `
@@ -21,5 +22,17 @@ query getCart{
   }
 }
 `
+const GET_HISTORY = gql `
+query getHistory{
+  History{
+    id
+    name
+    price
+    quantity
+    ProductId
+    createdAt
+  }
+}
+`
 
-export { GET_PRODUCTS, GET_CARTS }
+export { GET_PRODUCTS, GET_CARTS, GET_HISTORY }

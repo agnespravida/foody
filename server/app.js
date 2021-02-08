@@ -15,7 +15,8 @@ const typeDefs = gql`
     price: Int,
     stock: Int,
     updatedAt: String,
-    createdAt: String
+    createdAt: String,
+    imageUrl: String
   }
   type Data {
     id: ID,
@@ -24,7 +25,8 @@ const typeDefs = gql`
     price: Int,
     quantity: Int,
     updatedAt: String,
-    createdAt: String
+    createdAt: String,
+    imageUrl: String
   }
   type Message {
     message: String
@@ -82,6 +84,7 @@ const resolvers = {
               ProductId: cart.Product.id,
               name: cart.Product.name,
               price: cart.Product.price,
+              imageUrl: cart.Product.imageUrl,
               quantity: cart.quantity,
               updatedAt: cart.updatedAt,
               createdAt: cart.createdAt
@@ -113,6 +116,7 @@ const resolvers = {
               id: history.id,
               ProductId: history.Product.id,
               name: history.Product.name,
+              imageUrl: history.Product.imageUrl,
               price: history.Product.price,
               quantity: history.quantity,
               updatedAt: history.updatedAt,
