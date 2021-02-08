@@ -39,13 +39,18 @@ function ProductCard (props) {
   }
   return (
     <>
-      <Card className={styles.card}>
+      <Card className={styles.card} >
       <Card.Img variant="top" src={props.product.imageUrl} />
         <Card.Body>
           <p style={{fontSize: '0.8rem', marginBottom: '5px'}}>{props.product.name}</p>
           <p style={{fontSize: '0.8rem', marginBottom: '5px'}}><b>Rp. {props.product.price}</b></p>
           <ProgressBar variant={props.product.stock > 6 ? "info":"danger"} now={props.product.stock*10} label={`${props.product.stock} items`}/>
-          <Button style={{marginTop: '5px'}} onClick={handleAddToCart}>Add to cart</Button>
+          {
+            props.product.stock > 0 ? 
+            <Button style={{marginTop: '10px'}} onClick={handleAddToCart} block><i className="fa fa-shopping-cart" style={{fontSize: '20px', color: 'white'}}></i> Add to cart</Button>
+            :
+            <Button style={{marginTop: '10px'}} variant="secondary" disabled block><i className="fa fa-shopping-cart" style={{fontSize: '20px', color: 'white'}}></i> Out of Stock</Button>
+          }
         </Card.Body>
       </Card>
     </>

@@ -19,6 +19,7 @@ query getCart{
     price
     quantity
     ProductId
+    imageUrl
   }
 }
 `
@@ -31,6 +32,7 @@ query getHistory{
     quantity
     ProductId
     createdAt
+    imageUrl
   }
 }
 `
