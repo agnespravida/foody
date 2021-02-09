@@ -1,0 +1,24 @@
+.jumbotronimage {
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url("https://envato-shoebox-0.imgix.net/cbba/5ef3-9c68-474f-b7c1-90ab265ad466/DSC_8969+copy_2.jpg?auto=compress%2Cformat&fit=max&mark=https%3A%2F%2Felements-assets.envato.com%2Fstatic%2Fwatermark2.png&markalign=center%2Cmiddle&markalpha=18&w=1600&s=600b608669ec0e52717b8f9d36932c0a");
+  height: 30rem;
+}
+
+.container {
+  margin-top: 12rem;
+  font-size: 5rem;
+  margin-left: 5rem;
+}
+
+
+
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  .container {
+    margin-top: 15rem;
+    font-size: 3rem;
+    margin-left: 2rem;
+  }
+}

@@ -1,0 +1,24 @@
+.main {
+  padding: 5rem 0;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url("https://thecountryclub.com.au/wp-content/uploads/2018/12/background-food.jpg");
+  height: 100vh;
+}
+
+.card {
+  width: 400px;
+  padding: 30px;
+  margin: 20px;
+  background: rgba( 255, 255, 255, 0.35 );
+  box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+  backdrop-filter: blur( 4px );
+  -webkit-backdrop-filter: blur( 4px );
+  border-radius: 10px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
